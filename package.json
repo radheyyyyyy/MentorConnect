@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "@prisma/client": "^5.19.1",
+    "@supabase/auth-ui-react": "^0.4.7",
+    "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/supabase-js": "^2.45.3",
+    "aos": "^2.3.4",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.6.0",
+    "nodemailer": "^6.9.15",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "prisma": "^5.19.1"
+  }
+}

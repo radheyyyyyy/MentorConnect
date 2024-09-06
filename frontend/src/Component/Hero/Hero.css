@@ -1,0 +1,47 @@
+.parent {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    /* background-color: #acedff; */
+    background-color: #fff;
+    width: 100%;
+}
+
+.rightchild{
+    width: 100%;
+    
+}
+.rightchild > img{
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    padding-top: 15px;
+}
+.childleft{
+    color: #0368ff;
+    padding-right: 20px;
+    width: 100%;
+    font-size: 15px;
+    text-align: center;
+    font-weight: 500;
+}
+.hero-btn{
+    border-radius: 15px;
+    padding: 5px;
+    background-color:#0368ff ;  
+    color: #fff;
+    border: 2px solid #1acae1;
+    box-shadow: #000;
+    font-weight: bold;
+}
+.hero-btn:hover{
+    background-color:#fff;  
+    color: #0368ff;
+    cursor: pointer;
+}
+.hero-btn-parent{
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-top: 20px;
+}

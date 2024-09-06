@@ -1,0 +1,27 @@
+.header{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 5%;
+    background-color: #53aefd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+}
+.logo{
+    font-size: 22px;
+    color:#fff;
+    font-weight: 700;
+}
+.navbar a{
+    position: relative;
+    font-size: 18px;
+    color:  #fff;
+    font-weight: 500;
+    margin-left: 30px;
+}
+.navbar a:hover{
+    color: gray;
+}
