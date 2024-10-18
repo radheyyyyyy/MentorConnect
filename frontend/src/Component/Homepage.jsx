@@ -1,7 +1,7 @@
 
 
 import React from 'react';
-import Navbar from "./Navbar.jsx";
+import HomeNavBar from "./HomeNavBar.jsx";
 import Footer from "./footer/index.jsx";
 import MainSec from "./MainSection/index.jsx";
 import {useNavigate} from "react-router-dom";
@@ -10,7 +10,7 @@ const HomePage = () => {
     const navigate=useNavigate();
     return (
         <div>
-            <Navbar/>
+            <HomeNavBar/>
         <div className="relative h-screen overflow-hidden">
             <video
                 className="absolute top-0 left-0 w-full h-full object-cover"

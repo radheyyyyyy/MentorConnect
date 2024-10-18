@@ -1,186 +1,340 @@
-import React, {useEffect, useState} from 'react';
-import google from '../assets/login-with-google.svg';
-import image from '../assets/Login.jpeg';
-import axios from "axios";
-import {Link, useNavigate} from "react-router-dom";
-import {useGoogleLogin} from "@react-oauth/google";
-import {jwtDecode} from "jwt-decode";
+import React, { useState } from 'react';
+import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import { AiOutlineMail, AiOutlineLock, AiOutlineClose } from 'react-icons/ai';
+
 function Login() {
-    const [user,setUser]=useState("");
-    const [flag,setFlag]=useState(false);
+    const [email, setE] = useState('');
+    const [pass, setP] = useState('');
+    const [msg, setM] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [errorFields, setErrorFields] = useState([]);
+    const [showEmailModal, setShowEmailModal] = useState(false); // Modal for email input
+    const [showOTPModal, setShowOTPModal] = useState(false); // Modal for OTP input
+    const [showResetPasswordModal, setShowResetPasswordModal] = useState(false); // Modal for password reset
+    const [resetEmail, setResetEmail] = useState(''); // Email for password reset
+    const [otp, setOtp] = useState(''); // OTP for verification
+    const [newPassword, setNewPassword] = useState(''); // New password
+    const [confirmPassword, setConfirmPassword] = useState(''); // Confirm new password
+    const [passmsg,setpassMsg]=useState("");
+    const navigate = useNavigate();
 
-    const googleLogin=useGoogleLogin({ onSuccess:(response)=>{
-        setUser(response.access_token)
-            console.log(user);
-    },onError:()=>{alert("Sign in failed")}})
-    const [email,setE]=useState("");
-    const [pass,setP]=useState("");
-    const [msg,setM]=useState("");
-    const navigate=useNavigate();
-    const [profile,setProfile]=useState("");
-    const [loading,setLoading]=useState(false);
+    const getShakeClass = (field) => {
+        return errorFields.includes(field) ? 'animate-shake border-red-500' : '';
+    };
 
-
-    useEffect(()=>{
-        if(flag){
-            setTimeout(()=>{
-                navigate('/register')
-            },2000)
-        }
-    },[flag])
-
-    function load(){
-        if(loading){
-            return <>
-                <div role="status">
-                    <svg aria-hidden="true"
-                         className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
-                         viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                            fill="currentColor"/>
-                        <path
-                            d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                            fill="currentFill"/>
-                    </svg>
-                    <span className="sr-only">Loading...</span>
-                </div>
-            </>
-        }
-        else {
-            return <>
-            <span>Continue with Google</span>
-            </>
-        }
-    }
-
-    useEffect(() => {
-        if (user) {
-            setLoading(true)
-            axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user}`, {
-                headers: {
-                    Authorization: `Bearer ${user}`,
-                    Accept: 'application/json'
+    const handleLogin = async () => {
+        if (email === '' || pass === '') {
+            setM('Please enter all details');
+            const errors = [];
+            if (!email) errors.push('email');
+            if (!pass) errors.push('password');
+            setErrorFields(errors);
+            setTimeout(() => setErrorFields([]), 500);
+        } else {
+            try {
+                setLoading(true);
+                const res = await axios.post('http://localhost:3000/login', {
+                    email: email,
+                    pass: pass
+                });
+                setLoading(false);
+                if (res.data.msg === 'invalid_username_or_pass') {
+                    setM('Invalid username or password');
+                    setErrorFields(['email', 'password']);
+                    setTimeout(() => setErrorFields([]), 500);
+                } else if (res.data.msg === 'register_first') {
+                    setM('Please register first');
+                    setTimeout(() => navigate('/register'), 2000);
+                } else if (res.data.msg === 'login_success') {
+                    await localStorage.setItem('token', 'Bearer ' + res.data.token);
+                    navigate('/');
+                } else {
+                    setM('Invalid inputs');
                 }
-            }).then(async (res) => {
-                if (res.data.verified_email) {
-                    axios.post("http://localhost:3000/login", {
-                        email: res.data.email, pass: "google"
-                    }).then((res) => {
-                        if (res.data.msg === "login_success") {
-                            navigate("/");
-                            localStorage.setItem("token", "Bearer " + res.data.token)
-                        }
-                        if (res.data.msg === "register_first") {
-                            alert("Please register first");
-                            navigate("/register")
-                        }
-                    })
-                }
-                })
+            } catch (error) {
+                setLoading(false);
+                setM('An error occurred. Please try again.');
+            }
+        }
+    };
 
-    }
-    },[user])
+    // Handle Forgot Password
+    const handleForgotPassword = () => {
+        setShowEmailModal(true);
+    };
+
+    // Handle Reset Password (Email Modal)
+    const handleEmailSubmit = async () => {
+        if (!resetEmail) {
+            alert('Please enter your email.');
+            return;
+        }
+        // Make API call to send OTP to the email
+        try {
+            const response = await axios.post('http://localhost:3000/resetpassword/sendotp', {
+                email: resetEmail
+            });
+            if(response.data.msg==='no_user_for_reset'){
+                setpassMsg("Invalid email or no user with the provided email.")
+            }
+            else if (response.data.msg==='success') {
+                localStorage.setItem("token", response.data.otpToken);
+                setShowEmailModal(false);
+                setShowOTPModal(true); // Show OTP modal
+            } else {
+                alert('Error sending OTP');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to send OTP.');
+        }
+    };
+
+    // Handle OTP submission
+    const handleOTPSubmit = async () => {
+        if (!otp) {
+            alert('Please enter the OTP.');
+            return;
+        }
+
+        try {
+            const response = await axios.post('http://localhost:3000/resetpassword/checkotp', {
+                otp
+            }, { headers: { token: localStorage.getItem("token") } });
+            if (response.data.msg === 'otp_verified') {
+                localStorage.clear();
+                localStorage.setItem("token",response.data.reset_token);
+                setShowOTPModal(false);
+                setShowResetPasswordModal(true); // Show reset password modal
+            } else {
+                alert('Invalid OTP');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to verify OTP.');
+        }
+    };
+
+    // Handle Password Reset
+    const handlePasswordReset = async () => {
+        if (!newPassword || !confirmPassword) {
+            alert('Please enter both passwords.');
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            alert('Passwords do not match.');
+            return;
+        }
+
+        try {
+            const response = await axios.post('http://localhost:3000/resetpassword', {
+                pass:newPassword
+            }, { headers: { token: localStorage.getItem("token") } });
+            if (response.data.msg === 'password_reset_success') {
+                alert('Password reset successfully!');
+                setShowResetPasswordModal(false);
+                navigate('/login'); // Redirect to login after successful reset
+            } else {
+                alert('Failed to reset password.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('An error occurred while resetting the password.');
+        }
+    };
 
     return (
-        <>
-            <div className='parent pt-0 pr-0 pl-0'>
-                <div className='Leftchild color bg-blue-300 w-6/12 h-screen pt-0-'>
+        <div className="flex justify-center items-center h-screen bg-gray-200">
+            <div className="bg-white shadow-lg rounded-lg p-10 max-w-md w-full">
+                <div className="text-center text-2xl font-bold mb-6">
+                    Login to <span className="text-blue-600">MentorGuide</span>
                 </div>
-                <div className='Rightchild flex bg-blue-600 w-6/12 h-screen'></div>
-                <div className="FormContainer absolute top-0 left-0 w-full h-full flex justify-center items-center">
-                    <div className="bg-white   h-[450px] w-[950px] rounded-md shadow-md flex">
-                        <div className='w-full flex justify-center items-center ' >
-                            <form>
-                                <div className="text-black font-bold text-center text-[25px]  mt-7 mb-7">Welcome to<span
-                                    className='text-blue-700'> CodeTitans</span></div>
-                                <div>
-                                    <button type={'button'} onClick={async ()=>{
-                                        googleLogin();
-                                    }}
-                                        className='flex w-full shadow-md  p-2 border-[1px] border-gray-300 rounded mb-2'>
-                                        <img className='h-6 max-w-6' src={google} alt=""/>
-                                        <span className='w-full text-center flex justify-center items-center'>{load()}</span>
-                                    </button>
-                                </div>
-                                <div className='flex w-full items-center'>
-                                    <hr className='w-full'/>
-                                    <span className='w-full text-[10px] text-center opacity-20'>LOGIN WITH EMAIL</span>
-                                    <hr className='w-full'/>
-                                </div>
-                                <div className=" flex flex-col mt-2">
-                                    <label className="text-black">Email:</label>
-                                    <input onChange={(e) => {
-                                        setE(e.target.value)
-                                    }} type="text" placeholder='Enter your email'
-                                           className="bg-white border-2 border-gray-300 p-2  rounded-md max-w-[300px]"/>
-                                </div>
-                                <div className="flex flex-col mb-2 mt-2">
-                                    <label className="text-black">Password:</label>
-                                    <input onChange={(e) => {
-                                        setP(e.target.value)
-                                    }} placeholder='Enter your password' type="password"
-                                           className="bg-white border-2 border-gray-300 p-2 max-w-[300px] rounded-md"/>
-                                </div>
 
-                                <div className='text-red-600 pt-1 pb-1'>{msg}</div>
+                {/* Email Input */}
+                <CustomInputField
+                    type="email"
+                    labelName="Email"
+                    placeholder="Enter your email"
+                    change={(e) => setE(e.target.value)}
+                    className={`${getShakeClass('email')}`}
+                    icon={<AiOutlineMail />}
+                />
 
-                                <div className='flex'>
-                                    <div className='text-[10px] flex'>
-                                        <input onClick={() => {
-                                            set(true)
-                                        }} type="checkbox" name="" id=""/>
-                                        <span className='ml-2 text-[14px] text-slate-400'>Remember me</span>
-                                    </div>
-                                    <div className='text-[14px] ml-10'>
-                                        <a href='/'><u>
-                                            Forgot Password
-                                        </u>
-                                        </a>
-                                    </div>
-                                </div>
-                                <div className="col-span-3 flex justify-center mr-[40px] pt-2">
-                                    <button type='button' onClick={async () => {
-                                        if (email === "" || pass === "") {
-                                            setM("Please enter all details")
-                                        } else {
-                                            const res = await axios.post('http://localhost:3000/login', {
-                                                email: email, pass: pass
-                                            })
-                                            if (res.data.msg === "invalid_username_or_pass") {
-                                                setM("Invalid username or password")
-                                            } else if (res.data.msg === "register_first") {
-                                                setFlag(true);
-                                                setM("Please register first");
+                {/* Password Input */}
+                <CustomInputField
+                    type="password"
+                    labelName="Password"
+                    placeholder="Enter your password"
+                    change={(e) => setP(e.target.value)}
+                    className={`${getShakeClass('password')}`}
+                    icon={<AiOutlineLock />}
+                />
 
-                                            } else if(res.data.msg==='login_success') {
-                                                    await localStorage.setItem("token", "Bearer " + res.data.token)
-                                                    navigate("/")
-                                            }
-                                            else {
-                                                setM("Invalid inputs")
-                                            }
-                                        }
+                {/* Error Message */}
+                {msg && <div className="text-red-600 mb-2">{msg}</div>}
 
-                                    }}
-                                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-md ">
-                                        Submit
-                                    </button>
-                                </div>
-                                <div className='flex justify-center mt-2'>
-                                    <div className='text-black'>Don't have an account?&nbsp;<span
-                                        className='text-blue-600 underline'><Link to={"/register"}>SignUp</Link></span>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div className='hidden sm:md:flex w-full bg-green-500'>
-                            <img className="w-full object-cover h-full" src={image}></img>
-                        </div>
+                {/* Forgot Password */}
+                <div className="flex justify-end mb-4">
+                    <div>
+                        <span
+                            onClick={handleForgotPassword}
+                            className="text-sm text-blue-600 hover:underline cursor-pointer"
+                        >
+                            Forgot Password?
+                        </span>
                     </div>
                 </div>
+
+                {/* Login Button */}
+                <div className="flex justify-center mb-4">
+                    <button
+                        onClick={handleLogin}
+                        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out"
+                    >
+                        {loading ? 'Logging in...' : 'Login'}
+                    </button>
+                </div>
+
+                {/* Sign Up Link */}
+                <div className="text-center text-sm text-gray-600">
+                    Don't have an account?{' '}
+                    <Link to="/register" className="text-blue-600 hover:underline">
+                        Sign up
+                    </Link>
+                </div>
             </div>
-        </>
+
+            {/* Forgot Password Email Modal */}
+            {showEmailModal && (
+                <Modal closeModal={() => setShowEmailModal(false)}>
+                    <h3 className="text-xl mb-4 text-center">Recover your Password</h3>
+                    <CustomInputField
+                        type="email"
+                        labelName="Email"
+                        placeholder="Enter your email"
+                        change={(e) => setResetEmail(e.target.value)}
+                    />
+                    <div className='text-red-500 text-center p-2'>{passmsg}</div>
+                    <div className='flex justify-center w-full'>
+                        <button
+                            onClick={handleEmailSubmit}
+                            className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                        >
+                            Send OTP
+                        </button>
+                    </div>
+                </Modal>
+            )}
+
+            {/* OTP Modal */}
+            {showOTPModal && (
+                <Modal closeModal={() => setShowOTPModal(false)}>
+                    <h3 className="text-xl mb-4">Enter OTP</h3>
+                    <CustomInputField
+                        type="text"
+                        labelName="OTP"
+                        placeholder="Enter the OTP"
+                        change={(e) => setOtp(e.target.value)}
+                    />
+                    <div className='flex justify-center w-full'>
+                        <button
+                            onClick={handleOTPSubmit}
+                            className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                        >
+                            Verify OTP
+                        </button>
+                    </div>
+                </Modal>
+            )}
+
+            {/* Reset Password Modal */}
+            {showResetPasswordModal && (
+                <Modal closeModal={() => setShowResetPasswordModal(false)}>
+                    <h3 className="text-xl mb-4">Reset Your Password</h3>
+                    <CustomInputField
+                        type="password"
+                        labelName="New Password"
+                        placeholder="Enter new password"
+                        change={(e) => setNewPassword(e.target.value)}
+                    />
+                    <CustomInputField
+                        type="password"
+                        labelName="Confirm Password"
+                        placeholder="Confirm your new password"
+                        change={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    <div className='flex justify-center w-full'>
+                        <button
+                            onClick={handlePasswordReset}
+                            className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                        >
+                            Reset Password
+                        </button>
+                    </div>
+                </Modal>
+            )}
+        </div>
+    );
+}
+
+function CustomInputField({ type, labelName, placeholder, change, className, icon }) {
+    const [isFocused, setIsFocused] = useState(false);
+    const [hasText, setHasText] = useState(false);
+
+    const handleBlur = (e) => {
+        setIsFocused(false);
+        setHasText(e.target.value !== '');
+    };
+
+    const handleFocus = () => {
+        setIsFocused(true);
+    };
+
+    return (
+        <div className="relative mb-4 w-full">
+            <input
+                type={type}
+                placeholder={isFocused ? '' : placeholder}
+                className={`w-full p-3 pl-12 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:border-blue-500 ${className} ${
+                    isFocused ? 'border-blue-500' : 'border-gray-300'
+                }`}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                onChange={change}
+            />
+
+            <label
+                className={`absolute left-12 top-[-0.2rem] text-xs bg-white px-1 transition-all duration-200 pointer-events-none ${
+                    isFocused || hasText ? 'text-blue-500' : 'text-gray-500'
+                }`}
+                style={{
+                    transform: isFocused || hasText ? 'translateY(-0.5rem) translateX(-2.5rem)' : 'translateX(-2rem) translateY(-0.2rem)',
+                    fontSize: isFocused || hasText ? '0.85rem' : '0.9rem',
+                    color: isFocused ? 'blue' : 'gray',
+                }}
+            >
+                {labelName}
+            </label>
+
+            <div className="absolute left-3 top-[1rem] text-gray-400">{icon}</div>
+        </div>
+    );
+}
+
+function Modal({ closeModal, children }) {
+    return (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+            <div className="w-96 bg-white p-6 rounded-lg shadow-lg relative">
+                <button
+                    onClick={closeModal}
+                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+                >
+                    <AiOutlineClose size={24} />
+                </button>
+                {children}
+            </div>
+        </div>
     );
 }
 

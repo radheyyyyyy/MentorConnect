@@ -1,193 +1,227 @@
-import google from '../assets/google.svg'
-import {useGoogleLogin} from "@react-oauth/google";
-import InputField from "../Component/InputField.jsx";
-import {Link, useNavigate} from "react-router-dom";
-import React, {useEffect, useState} from "react";
+import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 import axios from "axios";
+import { AiOutlineMail, AiOutlineLock, AiOutlineUser } from "react-icons/ai";
 
-export default function Register(){
-    const navigate=useNavigate();
-    const [firstName,setF]=useState("");
-    const [lastName,setL]=useState("");
-    const [email,setE]=useState("");
-    const [pass,setP]=useState("");
-    const [confirm,setC]=useState("");
-    const [msg,setM]=useState("");
-    const [user,setUser]=useState("");
-    const [loading,setLoading]=useState(false);
-    const login=useGoogleLogin({onSuccess:res=>{setUser(res.access_token)}});
-    const [verified,setV]=useState(false);
-    const [data,setData]=useState({});
-    useEffect(()=>{
-        if(verified){
-        if(data.user.aud==='authenticated'){
-            console.log(data)
-            const res=axios.post("https://backend.mahiradhey0204.workers.dev/register",{
-                firstName:data.user.user_metadata.firstName,lastName:user.user_metadata.lastName,email:email,pass:pass
-            }).then((res)=>{
-                if(res.data.msg==='login'){alert("Please Login to your account");navigate('/login')}
-                else if(res.data.msg==='register_fail'){ setM('Invalid inputs')}
-                else navigate("/login")
-            })
-            }}
-    },[verified])
+export default function Register() {
+    const navigate = useNavigate();
+    const [firstName, setF] = useState("");
+    const [lastName, setL] = useState("");
+    const [email, setE] = useState("");
+    const [pass, setP] = useState("");
+    const [confirm, setC] = useState("");
+    const [msg, setM] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [errorFields, setErrorFields] = useState([]);
 
+    const handleRegister = async () => {
+        let error = false;
+        let missingFields = [];
 
-    function googleload(){
-        if(loading){
-            return <>
-                <div role="status" className='sm:md:pl-12'>
-                    <svg aria-hidden="true"
-                         className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
-                         viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                            fill="currentColor"/>
-                        <path
-                            d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                            fill="currentFill"/>
-                    </svg>
-                    <span className="sr-only">Loading...</span>
-                </div>
-            </>
+        if (firstName === "") missingFields.push("firstName");
+        if (lastName === "") missingFields.push("lastName");
+        if (email === "") missingFields.push("email");
+        if (pass === "") missingFields.push("password");
+        if (confirm === "") missingFields.push("confirmPassword");
+
+        if (missingFields.length > 0) {
+            setM("Please enter all details");
+            error = true;
+        } else if (pass !== confirm) {
+            setM("Passwords do not match.");
+            error = true;
+            missingFields.push("password", "confirmPassword");
         }
-        else {
-            return <>
-                <span>Continue with Google</span>
-            </>
-        }
-    }
 
+        setErrorFields(missingFields);
 
-
-    useEffect(()=>{
-        if(user){
-            axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user}`, {
-                headers: {
-                    Authorization: `Bearer ${user}`,
-                    Accept: 'application/json'
-                }
-            }).then((res)=>{
+        if (!error) {
+            try {
                 setLoading(true);
-                axios.post("https://backend.mahiradhey0204.workers.dev/register",{
-                    firstName:res.data.given_name,lastName:res.data.family_name,email:res.data.email,pass:"google"
-                }).then((res)=>{
-                    if(res.data.msg==='register_success'){navigate("/login")}
-                    else if(res.data.msg==='login') {
-                        navigate('/login')
+                const res = await axios.post('http://localhost:3000/register/verify', {
+                    email, pass, firstName, lastName
+                });
+                setLoading(false);
+                if (res.data.msg === 'please_login') {
+                    setM("Please login to your account");
+                    setTimeout(()=>navigate('/login'),2000);
+                } else if (res.data.msg === 'check_mail') {
+                    setM('Please check your mail before trying again.');
+                } else if (res.data.msg === 'verify_email') {
+                    setM('Verification link has been sent.');
+                } else {
+                    setM('Try again later.');
+                }
+            } catch (e) {
+                setM("Please try again.");
+                setLoading(false);
+            }
+        }
+    };
+
+    const getShakeClass = (field) => {
+        return errorFields.includes(field) ? "animate-shake border-red-500" : "";
+    };
+
+    return (
+        <div className="relative w-full h-screen flex justify-center items-center bg-gray-100">
+            {/* Background Animation */}
+            <div className="absolute w-full h-full top-0 left-0 z-0">
+                <style>{`
+                    .animated-bg {
+                        background: linear-gradient(135deg, #1E3A8A,#22055c, #000);
+                        background-size: 400% 400%;
+                        animation: gradient-animation 7s ease infinite;
                     }
-                    else {
-                        setM("Invalid inputs")
+
+                    @keyframes gradient-animation {
+                        0% { background-position: 0% 50%; }
+                        50% { background-position: 100% 50%; }
+                        100% { background-position: 0% 50%; }
                     }
-                })
+                `}</style>
+                <div className="animated-bg absolute top-0 left-0 w-full h-full" />
+            </div>
 
-        })}
-    },[user])
-
-
-    return(
-        <div className='w-full h-screen flex justify-center items-center select-none bg-gradient-to-r from-[#c3dbf5] to-[#3299fa]'>
-            <div className='flex justify-center sm:md: w-[90%] sm:md:w-[70%]'>
-                <div className='px-6 sm:md:px-14 py-3 sm:md:py-5 bg-gray-50 md:rounded-bl md:rounded-tl  shadow-xl w-[90%] sm:md:w-[50%]'>
-                    <div className='text-center text-black font-bold text-4xl pb-4 font-montserrat'>Register Here</div>
-                    <div className='p-2 flex justify-center items-center w-full'>
-                        <div className='w-full'>
-                            <button onClick={()=>{login()}}
-                                className='hover:shadow-gray-100 p-2 active:shadow-gray-500 text-center shadow-md shadow-gray-300 w-full '>
-                                <div className='flex space-x-6'>
-                                    <img className='h-6' src={google} alt={'logo'}/>
-                                    <div className='sm:md:pl-10 font-semibold font-montserrat'>{googleload()}</div>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="h-2 flex items-center my-5">
-                        <div className="flex-grow border-t border-gray-300"></div>
-                        <span className="text-sm text-gray-500">OR SIGN UP WITH EMAIL</span>
-                        <div className="flex-grow border-t border-gray-300"></div>
-                    </div>
-                    <div className='mb-2 flex space-x-3 '>
-                        <div>
-                            <label className='font-semibold pb-1 font-montserrat'>First Name</label>
-                            <input className='font-montserrat rounded-md w-full focus:border-blue-800 border-2 p-1'
-                                   type='text' placeholder='First Name' onChange={(e)=>{setF(e.target.value)}}/>
-                        </div>
-                        <div>
-                            <label className='font-semibold pb-1 font-montserrat'>Last Name</label>
-                            <input className='font-montserrat rounded-md w-full focus:border-blue-800 border-2 p-1'
-                                   type='text' placeholder='Last Name' onChange={(e)=>{setL(e.target.value)}}/>
-                        </div>
-                    </div>
-
-                    <div className='mb-2'>
-                        <InputField type={"text"} labelName={"Email"} placeholder={"Enter Mail"} change={(e)=>{setE(e.target.value)}}/>
-                    </div>
-                    <div className='mb-2'>
-                        <InputField type={"password"} labelName={'Password'} placeholder={"Enter Password"} change={(e)=>{setP(e.target.value)}} />
-                    </div>
-                    <div className='mb-2'>
-                        <InputField type={"Password"} labelName={"Confirm Password"} placeholder={"Confirm Password"} change={(e)=>{setC(e.target.value)}}/>
-                    </div>
-                    <div className='text-red-500 pt-1 pb-1'>{msg}</div>
-                    <div className='flex  pt-2 justify-center items-center w-full'>
-                        <button onClick={async ()=>{
-                                    if(firstName==="" || lastName==="" || email==="" || pass==="" || confirm===""){
-                                        setM("Please enter all details")
-                                    }
-                                    else if(pass!=="" && pass===confirm){
-                                        try{
-                                            const res=await axios.post('http://localhost:3000/register/verify',{
-                                                email:email,pass:pass,firstName:firstName,lastName:lastName
-                                            })
-                                            if(res.data.msg==='please_login'){
-                                                navigate('/login')
-                                            }
-                                            else if(res.data.msg==='check_mail') {
-                                                setM('Please check your mail before trying again.')
-                                            }
-                                            else if(res.data.msg==='verify_email'){
-                                                setM('Verification link has been sent.')
-                                            }
-                                            else {
-                                                setM('Try again after sometime.')
-                                            }
-                                           }
-                                        catch (e){setM("Please Try Again.")}
-                                    }
-                                    else {
-                                        setM("Password do not match.")
-                                    }
-                        }}
-                            className='text-center w-full bg-blue-800 text-white p-2 rounded hover:bg-blue-600'>
-
-                            <div className='flex'>
-                                <div className='flex justify-center  w-96'><div>Register</div></div>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                     strokeWidth={1.5}
-                                     stroke="currentColor" className="size-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round"
-                                          d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"/>
-                                </svg>
-                            </div>
-                        </button>
-                    </div>
-                    <div className='flex justify-center mt-2'>
-                        <div className='text-black'>Already have an account?&nbsp;<span
-                            className='text-blue-600 underline'><Link to={"/login"}>Login</Link></span>
-                        </div>
-                    </div>
+            {/* Card Content */}
+            <div className="relative w-[80%] h-full sm:w-[75%] lg:w-[65%] flex shadow-2xl rounded-xl overflow-hidden bg-white">
+                {/* Left Section */}
+                <div className="w-1/2 hidden md:flex flex-col justify-center bg-black p-16 text-white">
+                    <h2 className="text-4xl font-extrabold mb-6">Welcome to MentorGuide!</h2>
+                    <p className="text-lg">"Unlock your potential with expert guidance and mentorship. Together, we turn dreams into reality and growth into success."</p>
                 </div>
 
-                <>
-                    <div className='hidden sm:md:flex md:rounded-br md:rounded-tr overflow-hidden relative w-[50%]'>
-                        <img src='/assets/regsiter.jpg' alt="Register image" className='w-full h-full object-cover'/>
-                        <div className='absolute inset-0 bg-gradient-to-r from-[#3299fa] to-[#c3dbf5] opacity-10'></div>
+                {/* Right Section - Registration Form */}
+                <div className="w-full md:w-1/2 p-10 md:p-14 flex flex-col justify-center bg-white">
+                    <h2 className="text-3xl font-bold text-center text-black mb-2">Register now</h2>
+                    <p className='text-center text-sm text-gray-400 mb-3'>Join us today and start unlocking your true potential!</p>
+                    <div>
+                            <CustomInputField
+                                type="text"
+                                labelName="First Name"
+                                placeholder="Rahul"
+                                change={(e) => setF(e.target.value)}
+                                className={`${getShakeClass("firstName")}`}
+                                icon={<AiOutlineUser />}
+                            />
+                            <CustomInputField
+                                type="text"
+                                labelName="Last Name"
+                                placeholder="Shah"
+                                change={(e) => setL(e.target.value)}
+                                className={`${getShakeClass("lastName")}`}
+                                icon={<AiOutlineUser />}
+                            />
+                        <CustomInputField
+                            type="email"
+                            labelName="Email"
+                            placeholder="Enter your email"
+                            change={(e) => setE(e.target.value)}
+                            className={`${getShakeClass("email")}`}
+                            icon={<AiOutlineMail />}
+                        />
+                        <CustomInputField
+                            type="password"
+                            labelName="Password"
+                            placeholder="Enter your password"
+                            change={(e) => setP(e.target.value)}
+                            className={`${getShakeClass("password")}`}
+                            icon={<AiOutlineLock />}
+                        />
+                        <CustomInputField
+                            type="password"
+                            labelName="Confirm Password"
+                            placeholder="Re-enter your password"
+                            change={(e) => setC(e.target.value)}
+                            className={`${getShakeClass("confirmPassword")}`}
+                            icon={<AiOutlineLock />}
+                        />
                     </div>
+                    <div className="text-red-500 text-sm mt-2">{msg}</div>
 
+                    <button
+                        onClick={handleRegister}
+                        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-900 transition duration-300 ease-in-out text-md"
+                    >
+                        {loading ? (
+                            <svg
+                                className="animate-spin h-6 w-6 mx-auto text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M12 4.354l1.706-1.706A1 1 0 0012 1.646a1 1 0 00-1.706 1.002L12 4.354zM12 4.354V3h0M12 4.354V3h0M12 4.354V3h0"
+                                />
+                            </svg>
+                        ) : (
+                            "Sign Up for free"
+                        )}
+                    </button>
 
-                </>
-
+                    <div className="text-center text-sm mt-1 text-gray-600">
+                        Already have an account?{" "}
+                        <Link to="/login" className="text-blue-600 underline hover:text-purple-700">
+                            Login
+                        </Link>
+                    </div>
+                </div>
             </div>
         </div>
-    )
+    );
 }
+
+function CustomInputField({ type, labelName, placeholder, change, className, icon }) {
+    const [isFocused, setIsFocused] = useState(false);
+    const [hasText, setHasText] = useState(false);
+
+    const handleBlur = (e) => {
+        setIsFocused(false);
+        setHasText(e.target.value !== "");
+    };
+
+    const handleFocus = () => {
+        setIsFocused(true);
+    };
+
+    return (
+        <div className="relative mb-4 w-full">
+            {/* Input Field */}
+            <input
+                type={type}
+                placeholder={isFocused ? "" : placeholder}
+                className={`w-full p-3 pl-12 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:border-blue-500 ${className} ${
+                    isFocused ? "border-blue-500" : "border-gray-300"
+                }`}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                onChange={change}
+            />
+
+            {/* Label */}
+            <label
+                className={`absolute left-12 top-[-0.2rem] text-xs bg-white px-1 transition-all duration-200 pointer-events-none ${
+                    isFocused || hasText ? "text-blue-500" : "text-gray-500"
+                }`}
+                style={{
+                    transform: isFocused || hasText ? "translateY(-0.5rem) translateX(-2.5rem)" : "translateX(-2rem) translateY(-0.2rem)",
+                    fontSize: isFocused || hasText ? "0.85rem" : "0.9rem",
+                    color: isFocused ? "blue" : "gray",
+                }}
+            >
+                {labelName}
+            </label>
+
+            {/* Icon */}
+            <div className="absolute left-3 top-[1rem] text-gray-400">
+                {icon}
+            </div>
+        </div>
+    );
+}
+
+

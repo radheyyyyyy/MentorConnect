@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -20,7 +14,7 @@ model verifiedUsers {
   email      String    @unique
   pass       String
   isVerified Boolean
-  mentor     Mentors[]
+  mentors    Mentors[]
 }
 
 model Mentors {
@@ -29,9 +23,10 @@ model Mentors {
   emailId     String        @unique
   experience  Int
   skills      String
-  contact     String
-  currentJob  String
-  companyName String
-  city        String
+  contact     BigInt
+  currentJob  String?
+  companyName String?
+  Bio         String
+  url         String?
   user        verifiedUsers @relation(fields: [emailId], references: [email])
 }

@@ -16,4 +16,18 @@ const userSchema=new mongoose.Schema({
 })
 const User=mongoose.model('users',userSchema);
 
-module.exports={User}
+const messageSchema=new mongoose.Schema({
+    senderId:String,
+    receiverId:String,
+    content:String
+},{timestamps:true})
+
+const roomSchema=new mongoose.Schema({
+    hostEmail:String,
+    roomId:String,
+    createdAt:{type:Date,expires:60*60,default:Date.now()}
+
+})
+const Rooms=mongoose.model('rooms',roomSchema)
+const Messages=mongoose.model('messages',messageSchema)
+module.exports={User,Messages,Rooms}

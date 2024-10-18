@@ -4,10 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CodeTitans</title>
+    <title>MentorGUIDE</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="./src/main.jsx"></script>
+    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js"></script>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        const userLanguage = navigator.language || navigator.userLanguage;
+
+        new google.translate.TranslateElement({
+          pageLanguage: 'en',
+          includedLanguages: 'en,pa,hi,gu',
+          autoDetect: true, // Enable automatic language detection
+          preferredLanguage: userLanguage // Set the user's preferred language
+        }, 'google_element');
+      }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
   </body>
 </html>

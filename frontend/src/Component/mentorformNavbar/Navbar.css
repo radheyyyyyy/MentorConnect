@@ -1,0 +1,55 @@
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 2px 5%;
+    background-color: black;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+  }
+  
+  .logo {
+    font-size: 20px;
+    color: #fff;
+    font-weight: 700;
+  }
+  
+  .navbar a {
+    position: relative;
+    font-size: 18px;
+    color: #fff;
+    font-weight: 500;
+    margin-left: 30px;
+    margin-top: 1%;
+  }
+  
+  .navbar a:hover {
+    color: #0ADD08;
+  }
+  
+  .dropdown-list {
+    background-color: white;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    z-index: 101; /* Ensure it's above the navbar */
+  }
+  
+  .dropdown-list ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .dropdown-list ul li {
+    padding: 5px;
+    cursor: pointer;
+  }
+  
+  .dropdown-list ul li:hover {
+    background-color: #f0f0f0;
+  }
+  img{
+    font-size: 18pxl;
+  }
