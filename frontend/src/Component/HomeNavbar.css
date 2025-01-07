@@ -1,0 +1,130 @@
+/* Header container with fixed position and z-index for sticky behavior */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 5%;
+    background-color: #53aefd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+}
+
+/* Logo styling */
+.logo {
+    font-size: 22px;
+    color: #fff;
+    font-weight: 700;
+}
+
+#google_element{
+    margin-top: 20px;
+    font-family: "Poppins", sans-serif;
+
+}
+
+/* Hides the Google Translate badge */
+/* Hide only the Google Translate badge (Powered by Google) */
+/* Hide only the "Powered by Google" badge */
+
+
+
+/* Hide the entire 'Powered by' text */
+.goog-te-gadget span,
+.goog-logo-link {
+    display: none !important;
+}
+
+iframe.VIpgJd-ZVi9od-ORHb-OEVmcd {
+    display: none !important;
+}
+
+
+
+/* Style the dropdown menu */
+.goog-te-combo {
+    background-color: #000 !important; /* Set your desired background color */
+    color: #fff !important;            /* Set the text color */
+    border: 1px solid #fff !important; /* Optional: Border color to match design */
+    padding: 5px;
+    font-size: 14px;
+    border-radius: 4px; /* Optional: Rounds the corners */
+}
+
+/* Optionally style the dropdown options */
+.goog-te-combo option {
+    background-color: #000 !important; /* Background color of dropdown options */
+    color: #fff !important;            /* Text color for dropdown options */
+}
+
+.skiptranslate goog-te-gadget:after {
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+/* Navigation links styling */
+.homenavbar a {
+    position: relative;
+    font-size: 18px;
+    color: #fff;
+    font-weight: 500;
+    margin-left: 30px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.homenavbar a:hover {
+    color: gray;
+}
+
+/* Flexbox for consistent layout between logo, nav links, and widgets */
+.homenavbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex: 1;
+    gap: 20px;
+}
+
+
+
+.profile-icon {
+    background-color: white;
+    border-radius: 50%;
+    padding: 5px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
+/* Ensure header contents fit well on smaller screens */
+@media (max-width: 768px) {
+    .header {
+        padding: 10px 2%;
+    }
+    .homenavbar a {
+        margin-left: 15px;
+        font-size: 16px;
+    }
+    .profile-icon {
+        width: 30px;
+        height: 30px;
+    }
+    .translate-widget-container {
+        height: 30px;
+        width: 120px; /* Adjust for mobile screens */
+        font-size: 12px;
+    }
+    .translate-widget-container iframe {
+        height: 100% !important;
+    }
+}

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Mentors" ALTER COLUMN "contact" SET DATA TYPE BIGINT;
