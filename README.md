@@ -35,9 +35,8 @@ Mentor Connect is a web application that helps students and professionals connec
 ## Contributing
 Contributions are welcome! Feel free to fork the repo and submit a PR.
 
-## License
-This project is licensed under the MIT License.
+
 
 ---
-💡 **Developed with ❤️ by [Your Name]**
+💡 **Developed with ❤️ by Radhey**
 
