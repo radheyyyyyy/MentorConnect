@@ -26,12 +26,6 @@ Mentor Connect is a web application that helps students and professionals connec
 - Prisma CLI
 
 
-
-## Deployment
-- Use **Docker Compose** to containerize services
-- Deploy on **Vercel / AWS / DigitalOcean** for scalability
-
-
 ## Contributing
 Contributions are welcome! Feel free to fork the repo and submit a PR.
 
